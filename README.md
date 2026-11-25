@@ -3,7 +3,7 @@
 > **Baixe vídeos (até 4K), áudios (MP3 320 kbps), fotos HD e carrosséis do YouTube, Instagram e Twitter/X — tudo 100% local, sem anúncios e sem rastreadores.**  
 > **Comprima, converta e recorte mídias direto no celular com aceleração por hardware (Media3) e FFmpeg nativo.**
 
-[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.0.0-E50914.svg)](https://github.com/PatoDesoxigenado/NexusFetch-Android/blob/main/apk/version.json)
+[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.0.1-E50914.svg)](https://github.com/PatoDesoxigenado/NexusFetch-Android/blob/main/apk/version.json)
 [![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
 [![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026--35)-3DDC84.svg)](https://developer.android.com/)
 [![Kotlin](https://img.shields.io/badge/Kotlin-Compose%20Material%203-7F52FF.svg)](https://kotlinlang.org/)

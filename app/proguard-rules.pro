@@ -1,8 +1,15 @@
-# youtubedl-android & FFmpeg JNI
--keep class com.yausername.youtubedl_android.** { *; }
--keep class com.yausername.ffmpeg.** { *; }
--keep class com.yausername.common.** { *; }
+# youtubedl-android, FFmpeg JNI & reflection-based ZIP/JSON dependencies
+-keep class com.yausername.** { *; }
 -dontwarn com.yausername.**
+
+-keep class org.apache.commons.compress.** { *; }
+-dontwarn org.apache.commons.compress.**
+
+-keep class org.apache.commons.io.** { *; }
+-dontwarn org.apache.commons.io.**
+
+-keep class com.fasterxml.jackson.** { *; }
+-dontwarn com.fasterxml.jackson.**
 
 # kotlinx.serialization
 -keepattributes *Annotation*, InnerClasses

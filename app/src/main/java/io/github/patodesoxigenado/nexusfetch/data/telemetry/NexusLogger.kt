@@ -99,7 +99,13 @@ class NexusLogger @Inject constructor(
         throwable: Throwable?,
     ) {
         val rawMsg = if (throwable != null) {
-            "$message | ${throwable::class.simpleName}: ${throwable.message.orEmpty()}"
+            val cause = throwable.cause
+            val causeSuffix = if (cause != null) {
+                " (causa: ${cause::class.simpleName}: ${cause.message.orEmpty()})"
+            } else {
+                ""
+            }
+            "$message | ${throwable::class.simpleName}: ${throwable.message.orEmpty()}$causeSuffix"
         } else {
             message
         }

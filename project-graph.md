@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > Mapa estrutural e semântico para Obsidian e Otimização de Tokens do Antigravity.
-> **Atualizado em**: 2026-11-25 15:33:30 | **Stack**: Generic | **Arquivos Indexados**: 141
+> **Atualizado em**: 2026-11-25 15:58:56 | **Stack**: Generic | **Arquivos Indexados**: 142
 > **Legenda de Certeza**: `-->` Confirmada | `-.->` Inferida | `⚠️` Dependência Dinâmica/Desconhecida (exige validação no código).
 
 ## 1. Índice Estrutural (Visão Rápida)
@@ -528,6 +528,10 @@ graph TD
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 
 ### [[app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml]]
+- **Dependências Confirmadas**: Nenhuma
+- **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
+
+### [[app/src/main/res/raw/keep.xml]]
 - **Dependências Confirmadas**: Nenhuma
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 
