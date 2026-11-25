@@ -1,0 +1,148 @@
+{
+  "files": {
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/NexusFetchApp.kt": {
+      "summary": [
+        "Entrypoint @HiltAndroidApp do aplicativo Android com captura global de crashes no [[NexusLogger.kt]].",
+        "Executa limpeza de diretórios temporários órfãos via [[WorkDirCleaner.kt]] e inicialização/auto-update assíncrono do [[YoutubeDlEngine.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/MainActivity.kt": {
+      "summary": [
+        "Activity principal Jetpack Compose Material 3 com Edge-to-Edge e solicitação de permissão de notificações (API 33+).",
+        "Recebe payloads profundos enviados pela [[ShareSheetActivity.kt]] e os roteia para [[NexusNavHost.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/ShareSheetActivity.kt": {
+      "summary": [
+        "Activity transparente dedicada para ACTION_SEND e ACTION_SEND_MULTIPLE (links e arquivos locais).",
+        "Abre o [[QuickShareBottomSheet.kt]] conectado ao [[QuickShareViewModel.kt]] e encaminha arquivos locais ao [[MainActivity.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/service/JobOrchestrator.kt": {
+      "summary": [
+        "Orquestrador sequencial único de jobs pesados (Download, Multi-Download, Compressor, Conversor, Recorte).",
+        "Roteia downloads diretos HTTPS de Twitter/Instagram via [[DirectMediaDownloader.kt]] com extração local MP3 via [[FfmpegProcessExecutor.kt]] e controla [[MediaJobForegroundService.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/service/MediaJobForegroundService.kt": {
+      "summary": [
+        "Foreground Service compatível com Android 8–15: chama startForeground direto na API 35+ (bypass do bug de bitmask do core-1.15.0) e dataSync na API 29–34.",
+        "Mantém tarefas em segundo plano ativas, remove notificações no encerramento da fila e delega cancelamento ao [[JobOrchestrator.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/engine/MediaProber.kt": {
+      "summary": [
+        "Sonda zero-copy de mídias locais combinando MediaMetadataRetriever e MediaExtractor para obter duração, resolução, FPS e codecs sem copiar arquivos.",
+        "Usa ffprobe via [[FfmpegProcessExecutor.kt]] como fallback para containers exóticos."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/engine/YoutubeDlEngine.kt": {
+      "summary": [
+        "Encapsula youtubedl-android (yt-dlp + ffmpeg) com cache LRU de metadados (5 min), auto-update STABLE/NIGHTLY e recuperação 403.",
+        "Usa fast-paths HTTPS antes do Python para YouTube ([[YouTubeFastMetaClient.kt]]), Twitter ([[TwitterSyndicationClient.kt]]) e Instagram ([[InstagramMetaClient.kt]])."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/remote/YouTubeFastMetaClient.kt": {
+      "summary": [
+        "Busca HTML gzipado do YouTube Watch em até 6s evitando inicialização de Python/QuickJS no Share Sheet.",
+        "Delega parsing de ytInitialPlayerResponse e tamanhos ao [[YouTubeFastMetaParser.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/domain/policy/YouTubeFastMetaParser.kt": {
+      "summary": [
+        "Parser Kotlin puro balanceado para ytInitialPlayerResponse, videoId e tamanhos estimados por resolução.",
+        "Fornece buildVideoQualities compartilhado com [[YoutubeDlEngine.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/engine/MediaCompressorEngine.kt": {
+      "summary": [
+        "Compressor híbrido Discord/WhatsApp usando [[CompressionPlanCalculator.kt]] sem upsample de FPS e headroom HW (0.82x).",
+        "Tenta Media3 MediaCodec primeiro e usa fallback rápido FFmpeg libx264 1-Pass VBV (-preset veryfast) com retentativa de segurança."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/engine/MediaConverterEngine.kt": {
+      "summary": [
+        "Conversor em lote com remux instantâneo (-c copy) para MKV/MOV/MP4 compatíveis na resolução original.",
+        "Combina [[Media3Transcoder.kt]] (MP4/MKV/MOV) e fallback FFmpeg (-preset veryfast) via [[FfmpegProcessExecutor.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/engine/MediaTrimmerEngine.kt": {
+      "summary": [
+        "Recorte rápido remoto via [[YoutubeDlEngine.kt]] (--download-sections sem baixar vídeo completo) e local via [[FfmpegProcessExecutor.kt]] (-c copy com fallback silencioso).",
+        "Valida intervalos e formatos 2K/4K (VP9/AV1) pelo [[TrimRangeValidator.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/local/storage/MediaStorePublisher.kt": {
+      "summary": [
+        "Publica arquivos finalizados nas coleções públicas Movies/Music/Pictures/Download/NexusFetch com fallback automático para Downloads.",
+        "Usa fluxo atômico IS_PENDING (1 -> 0) no Android 10+ e MediaScannerConnection na API 26–28."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/local/db/NexusDatabase.kt": {
+      "summary": [
+        "Banco SQLite local via Room com histórico de mídias processadas ([[HistoryDao.kt]]) e fila persistente de Multi-Download ([[PendingQueueDao.kt]]).",
+        "Consome entidades normalizadas [[HistoryEntity.kt]] e [[PendingQueueEntity.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/remote/GitHubUpdateClient.kt": {
+      "summary": [
+        "Consulta o manifesto apk/version.json no repositório oficial selecionando APK Release ou Debug compatível com a ABI via [[AppUpdatePolicy.kt]].",
+        "Valida obrigatoriamente checksum SHA-256 antes de baixar via [[DirectMediaDownloader.kt]] e gerar Intent de instalação via FileProvider."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/domain/policy/AppUpdatePolicy.kt": {
+      "summary": [
+        "Política Kotlin pura que resolve atualizações Release (apk/NexusFetch.apk) e Debug por ABI (apk/debug/*.apk) a partir de version.json.",
+        "Controla cooldown periódico (6h), bloqueia path traversal fora de apk/ e valida SHA-256; consumida por [[GitHubUpdateClient.kt]] e [[SettingsViewModel.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/components/AppUpdateDialog.kt": {
+      "summary": [
+        "Diálogo Material 3 exibido pelo [[NexusNavHost.kt]] quando há atualização mais recente na pasta apk/ (Release ou Debug).",
+        "Exibe canal, tamanho formatado, notas, progresso de download em tempo real e dispara instalação verificada por SHA-256."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/navigation/NexusNavHost.kt": {
+      "summary": [
+        "Host Compose de navegação principal com barra inferior fixa, bottom sheet 'Mais Ferramentas' e card global [[JobProgressCard.kt]].",
+        "Dispara checagem periódica de atualização do [[SettingsViewModel.kt]] e apresenta [[AppUpdateDialog.kt]] globalmente."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/screens/settings/SettingsViewModel.kt": {
+      "summary": [
+        "Gerencia preferências persistentes ([[SettingsRepository.kt]]), atualização manual/automática do yt-dlp e logs diagnósticos.",
+        "Orquestra checagem periódica ([[AppUpdatePolicy.kt]]) e manual na pasta apk/ via [[GitHubUpdateClient.kt]] respeitando [[NetworkGuard.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/domain/policy/UrlValidator.kt": {
+      "summary": [
+        "Valida e normaliza links do YouTube, Instagram e Twitter/X com allowlist estrita de domínios HTTPS.",
+        "Fornece detecção automática cross-platform consumida por [[DownloaderViewModel.kt]] e [[MultiDownloadViewModel.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/domain/policy/CompressionPlanCalculator.kt": {
+      "summary": [
+        "Calcula orçamento de bitrate com margem de 6%, áudio adaptativo (128/96/64 kbps) e downscale/30fps sem upscale.",
+        "Gera alerta preventivo não-bloqueante quando videoKbps < 280 para [[CompressorViewModel.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/domain/policy/TwitterMediaFilter.kt": {
+      "summary": [
+        "Extrai mídias da API Syndication e FxTwitter do Twitter/X isolando o tweet raiz e preservando directUrl por resolução.",
+        "Reescreve imagens pbs.twimg.com para ?name=orig e deduplica URLs via [[MediaSanitizer.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/remote/InstagramMetaClient.kt": {
+      "summary": [
+        "Busca posts públicos e carrosséis do Instagram em paralelo (/p/ e /embed/captioned/) com fallback curl UA e telemetria.",
+        "Delega parsing de OpenGraph, contextJSON (edge_sidecar_to_children) e carrosséis mistos ao [[InstagramMetaParser.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/domain/policy/InstagramMetaParser.kt": {
+      "summary": [
+        "Parser Kotlin puro com scanner O(N) para decodificar contextJSON dupla-escapado (GraphSidecar) e tags OpenGraph do Instagram.",
+        "Prioriza carrosséis mistos (fotos + vídeos) antes de vídeos isolados, sendo consumido por [[InstagramMetaClient.kt]]."
+      ]
+    }
+  }
+}

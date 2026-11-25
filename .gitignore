@@ -1,0 +1,36 @@
+# Gradle & Build
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.vscode/
+/build/
+/app/build/
+/captures/
+.cxx/
+*.ap_
+*.aab
+
+# APKs locais de build são ignorados, exceto a pasta oficial de distribuição /apk/
+*.apk
+!apk/
+!apk/*.apk
+!apk/debug/
+!apk/debug/*.apk
+
+# Keystores & secrets
+*.keystore
+*.jks
+keystore.properties
+.env
+
+# Test media & local cache/temp files
+arquivos-teste/
+/arquivos-teste/
+/scratch/
+
+# OS & Logs
+.DS_Store
+Thumbs.db
+*.log
+logs/

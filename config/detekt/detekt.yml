@@ -1,0 +1,82 @@
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+  warningsAsErrors: false
+  checkExhaustiveness: false
+
+complexity:
+  active: true
+  LongMethod:
+    active: true
+    threshold: 95
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    active: true
+    functionThreshold: 12
+    constructorThreshold: 12
+    ignoreAnnotated: ['Composable', 'Inject']
+    ignoreDefaultParameters: true
+  ComplexCondition:
+    active: true
+    threshold: 5
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 22
+    ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 25
+    thresholdInClasses: 25
+    thresholdInInterfaces: 15
+    thresholdInObjects: 20
+
+empty-blocks:
+  active: true
+  EmptyCatchBlock:
+    active: true
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: false
+  SwallowedException:
+    active: true
+    ignoredExceptionTypes:
+      - 'InterruptedException'
+      - 'MalformedURLException'
+      - 'NumberFormatException'
+      - 'CancellationException'
+
+naming:
+  active: true
+  FunctionNaming:
+    active: true
+    ignoreAnnotated: ['Composable']
+  PackageNaming:
+    active: true
+
+performance:
+  active: true
+
+potential-bugs:
+  active: true
+  UnsafeCallOnNullableType:
+    active: true
+
+style:
+  active: true
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
+    excludeCommentStatements: true
+  ReturnCount:
+    active: false
+  UnusedImports:
+    active: true
+  WildcardImport:
+    active: false

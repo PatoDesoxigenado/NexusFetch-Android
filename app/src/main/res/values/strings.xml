@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NexusFetch</string>
+    <string name="share_sheet_label">Baixar / Processar com NexusFetch</string>
+    <string name="notification_channel_progress">Progresso de Mídia</string>
+    <string name="notification_channel_progress_desc">Exibe downloads, compressões, conversões e recortes em andamento.</string>
+    <string name="notification_channel_complete">Tarefas Concluídas</string>
+    <string name="notification_channel_complete_desc">Notifica quando um arquivo estiver pronto para abrir ou compartilhar.</string>
+</resources>

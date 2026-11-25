@@ -1,0 +1,32 @@
+{
+  "versionCode": 1,
+  "versionName": "1.0.0",
+  "updatedAt": "2026-11-25T18:29:12.814692400Z",
+  "releaseNotes": "NexusFetch v1.0.0: Downloads YouTube (4K/MP3), Instagram (Posts, Reels e Carrosséis) e Twitter/X; Share Sheet rápido, Multi-Download em fila, Compressor Discord/WhatsApp, Conversor em lote e Recorte Rápido.",
+  "release": {
+      "fileName": "NexusFetch.apk",
+      "path": "apk/NexusFetch.apk",
+      "sha256": "1bdc3da65718fa6670ed53477f67bcbd2d5b0da1a2cc6ccb1bc2c70f38a2c862",
+      "sizeBytes": 56565117,
+      "versionCode": 1,
+      "versionName": "1.0.0"
+    },
+  "debug": {
+    "arm64-v8a": {
+      "fileName": "NexusFetch_arm64-v8a-debug.apk",
+      "path": "apk/debug/NexusFetch_arm64-v8a-debug.apk",
+      "sha256": "b7035053ac728c992b850b3a0c1ca068bde6f5030c3d85a4ecb9a12ffcbc45a7",
+      "sizeBytes": 77571843,
+      "versionCode": 1,
+      "versionName": "1.0.0-debug"
+    },
+    "armeabi-v7a": {
+      "fileName": "NexusFetch_armeabi-v7a-debug.apk",
+      "path": "apk/debug/NexusFetch_armeabi-v7a-debug.apk",
+      "sha256": "d94b9eca7d1f09f35c1f39d30ea32520127d3b9af6fd4af76f31e821e6c51555",
+      "sizeBytes": 70899983,
+      "versionCode": 1,
+      "versionName": "1.0.0-debug"
+    }
+  }
+}
