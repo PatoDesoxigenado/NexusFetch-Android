@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > Mapa estrutural e semântico para Obsidian e Otimização de Tokens do Antigravity.
-> **Atualizado em**: 2026-11-25 15:58:56 | **Stack**: Generic | **Arquivos Indexados**: 142
+> **Atualizado em**: 2026-11-28 15:21:23 | **Stack**: Generic | **Arquivos Indexados**: 146
 > **Legenda de Certeza**: `-->` Confirmada | `-.->` Inferida | `⚠️` Dependência Dinâmica/Desconhecida (exige validação no código).
 
 ## 1. Índice Estrutural (Visão Rápida)
@@ -107,6 +107,13 @@ graph TD
 - **Resumo (IA)**:
   - Activity transparente dedicada para ACTION_SEND e ACTION_SEND_MULTIPLE (links e arquivos locais).
   - Abre o [[QuickShareBottomSheet.kt]] conectado ao [[QuickShareViewModel.kt]] e encaminha arquivos locais ao [[MainActivity.kt]].
+- **Dependências Confirmadas**: Nenhuma
+- **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
+
+### [[app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/engine/AudioCoverEmbedder.kt]]
+- **Resumo (IA)**:
+  - Baixa thumbnail de maior resolução via [[DirectMediaDownloader.kt]], recorta 1:1 via Bitmap e embute capa APIC ID3v2.3 no MP3 via [[FfmpegProcessExecutor.kt]].
+  - Acionado automaticamente pelo [[JobOrchestrator.kt]] em MP3s avulsos, playlists e Multi-Download do YouTube.
 - **Dependências Confirmadas**: Nenhuma
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 
@@ -309,6 +316,13 @@ graph TD
 - **Dependências Confirmadas**: Nenhuma
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 
+### [[app/src/main/java/io/github/patodesoxigenado/nexusfetch/domain/policy/AudioCoverPolicy.kt]]
+- **Resumo (IA)**:
+  - Política Kotlin pura para seleção de thumbnails do YouTube/YT Music, recorte 1:1 central (com remoção de letterbox 4:3) e args FFmpeg ID3v2.3.
+  - Espelha a versão Desktop v1.45 e é consumida por [[AudioCoverEmbedder.kt]] com cobertura em [[AudioCoverPolicyTest.kt]].
+- **Dependências Confirmadas**: Nenhuma
+- **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
+
 ### [[app/src/main/java/io/github/patodesoxigenado/nexusfetch/domain/policy/CompressionPlanCalculator.kt]]
 - **Resumo (IA)**:
   - Calcula orçamento de bitrate com margem de 6%, áudio adaptativo (128/96/64 kbps) e downscale/30fps sem upscale.
@@ -374,10 +388,10 @@ graph TD
 - **Dependências Confirmadas**: Nenhuma
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 
-### [[app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/components/AppUpdateDialog.kt]]
+### [[app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/components/AppUpdateBanner.kt]]
 - **Resumo (IA)**:
-  - Diálogo Material 3 exibido pelo [[NexusNavHost.kt]] quando há atualização mais recente na pasta apk/ (Release ou Debug).
-  - Exibe canal, tamanho formatado, notas, progresso de download em tempo real e dispara instalação verificada por SHA-256.
+  - Banner Material 3 exibido no topo do [[NexusNavHost.kt]] sempre que há versão mais nova na pasta apk/ (Release ou Debug).
+  - Mostra canal, arquivo, progresso SHA-256 e botão Atualizar sem bloquear a tela.
 - **Dependências Confirmadas**: Nenhuma
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 
@@ -407,8 +421,8 @@ graph TD
 
 ### [[app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/navigation/NexusNavHost.kt]]
 - **Resumo (IA)**:
-  - Host Compose de navegação principal com barra inferior fixa, bottom sheet 'Mais Ferramentas' e card global [[JobProgressCard.kt]].
-  - Dispara checagem periódica de atualização do [[SettingsViewModel.kt]] e apresenta [[AppUpdateDialog.kt]] globalmente.
+  - Host Compose de navegação principal com barra inferior fixa, bottom sheet 'Mais Ferramentas' e rota [[HelpScreen.kt]].
+  - Dispara checagem automática de atualização ao abrir via [[SettingsViewModel.kt]] e exibe [[AppUpdateBanner.kt]] no topo.
 - **Dependências Confirmadas**: Nenhuma
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 
@@ -448,6 +462,13 @@ graph TD
 - **Dependências Confirmadas**: Nenhuma
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 
+### [[app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/screens/help/HelpScreen.kt]]
+- **Resumo (IA)**:
+  - Tela Ajuda exibida logo abaixo de Ajustes no menu Mais Ferramentas do [[NexusNavHost.kt]].
+  - Resume o uso de Downloader, Share Sheet, Fila, Compressor, Recorte, Conversor, Pastas e Logs.
+- **Dependências Confirmadas**: Nenhuma
+- **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
+
 ### [[app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/screens/history/HistoryScreen.kt]]
 - **Dependências Confirmadas**: Nenhuma
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
@@ -474,8 +495,8 @@ graph TD
 
 ### [[app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/screens/settings/SettingsViewModel.kt]]
 - **Resumo (IA)**:
-  - Gerencia preferências persistentes ([[SettingsRepository.kt]]), atualização manual/automática do yt-dlp e logs diagnósticos.
-  - Orquestra checagem periódica ([[AppUpdatePolicy.kt]]) e manual na pasta apk/ via [[GitHubUpdateClient.kt]] respeitando [[NetworkGuard.kt]].
+  - Gerencia preferências persistentes ([[SettingsRepository.kt]]), carregamento sob demanda e salvamento de logs em Downloads via [[MediaStorePublisher.kt]].
+  - Orquestra checagem automática de atualização na abertura e manual na pasta apk/ via [[GitHubUpdateClient.kt]] respeitando [[NetworkGuard.kt]].
 - **Dependências Confirmadas**: Nenhuma
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 
@@ -564,6 +585,10 @@ graph TD
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 
 ### [[app/src/test/java/io/github/patodesoxigenado/nexusfetch/domain/policy/AppUpdatePolicyTest.kt]]
+- **Dependências Confirmadas**: Nenhuma
+- **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
+
+### [[app/src/test/java/io/github/patodesoxigenado/nexusfetch/domain/policy/AudioCoverPolicyTest.kt]]
 - **Dependências Confirmadas**: Nenhuma
 - **Quem usa / Impacto**: Entrypoint ou sem referência estática direta
 

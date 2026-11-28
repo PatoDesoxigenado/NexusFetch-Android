@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.patodesoxigenado.nexusfetch.data.engine.AudioCoverEmbedder
 import io.github.patodesoxigenado.nexusfetch.data.engine.FfmpegProcessExecutor
 import io.github.patodesoxigenado.nexusfetch.data.engine.MediaCompressorEngine
 import io.github.patodesoxigenado.nexusfetch.data.engine.MediaConverterEngine
@@ -54,6 +55,7 @@ class JobOrchestrator @Inject constructor(
     private val youtubeDlEngine: YoutubeDlEngine,
     private val directDownloader: DirectMediaDownloader,
     private val ffmpegExecutor: FfmpegProcessExecutor,
+    private val audioCoverEmbedder: AudioCoverEmbedder,
     private val compressorEngine: MediaCompressorEngine,
     private val converterEngine: MediaConverterEngine,
     private val trimmerEngine: MediaTrimmerEngine,
@@ -278,6 +280,16 @@ class JobOrchestrator @Inject constructor(
             updateProgress(req.displayTitle, frac * 96f, "", etaStr, "Baixando mídia...")
         }
 
+        if (req.mode == "audio" && meta.platform == Platform.YOUTUBE) {
+            updateProgress(req.displayTitle, 97f, "", "", "Embutindo capa do álbum no MP3...")
+            audioCoverEmbedder.tryEmbedYouTubeCover(
+                mp3File = outFile,
+                sourceUrl = meta.url,
+                fallbackThumbnailUrl = meta.thumbnailUrl,
+                workDir = workDir,
+            )
+        }
+
         val mediaType = if (req.mode == "audio") MediaType.AUDIO else MediaType.VIDEO
         val published = publisher.publishFile(
             sourceFile = outFile,
@@ -487,6 +499,22 @@ class JobOrchestrator @Inject constructor(
                     val etaStr = if (etaSec > 0) "ETA: ${MediaSanitizer.formatDuration(etaSec.toInt())}" else ""
                     val msg = "[${idx + 1}/${items.size}] ${item.title.take(28)}"
                     updateProgress(req.displayTitle, pct, "${idx + 1}/${items.size}", etaStr, msg)
+                }
+                if (req.mode == "audio" && req.metadata.platform == Platform.YOUTUBE) {
+                    val coverPct = AggregateProgressCalculator.calculateOverallPercent(idx, 0.97f, items.size)
+                    updateProgress(
+                        req.displayTitle,
+                        coverPct,
+                        "${idx + 1}/${items.size}",
+                        "",
+                        "[${idx + 1}/${items.size}] Embutindo capa no MP3...",
+                    )
+                    audioCoverEmbedder.tryEmbedYouTubeCover(
+                        mp3File = outFile,
+                        sourceUrl = item.url,
+                        fallbackThumbnailUrl = item.thumbnailUrl ?: req.metadata.thumbnailUrl,
+                        workDir = itemDir,
+                    )
                 }
                 val base = "$paddedIndex - ${MediaSanitizer.sanitizeFilename(item.title)}"
                 outputs.add(

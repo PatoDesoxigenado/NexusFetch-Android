@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.patodesoxigenado.nexusfetch.data.engine.FfmpegProcessExecutor
 import io.github.patodesoxigenado.nexusfetch.data.engine.YoutubeDlEngine
 import io.github.patodesoxigenado.nexusfetch.data.local.datastore.SettingsRepository
+import io.github.patodesoxigenado.nexusfetch.data.local.storage.MediaStorePublisher
+import io.github.patodesoxigenado.nexusfetch.data.local.storage.WorkDirCleaner
 import io.github.patodesoxigenado.nexusfetch.data.remote.GitHubUpdateClient
 import io.github.patodesoxigenado.nexusfetch.data.telemetry.NetworkGuard
 import io.github.patodesoxigenado.nexusfetch.data.telemetry.NetworkTransport
@@ -16,7 +18,6 @@ import io.github.patodesoxigenado.nexusfetch.domain.error.NexusError
 import io.github.patodesoxigenado.nexusfetch.domain.model.AppSettings
 import io.github.patodesoxigenado.nexusfetch.domain.model.ThemeMode
 import io.github.patodesoxigenado.nexusfetch.domain.model.UpdateInfo
-import io.github.patodesoxigenado.nexusfetch.domain.policy.AppUpdatePolicy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,17 +26,23 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 data class SettingsActionStatus(
     val isBusy: Boolean = false,
     val statusMessage: String? = null,
     val availableUpdate: UpdateInfo? = null,
-    val pendingUpdatePrompt: UpdateInfo? = null,
+    val showTopUpdateBanner: Boolean = false,
     val updateDownloadProgress: Float? = null,
-    val updateDialogError: String? = null,
+    val updateBannerError: String? = null,
     val installIntent: Intent? = null,
     val recentLogs: List<String> = emptyList(),
+    val logsLoaded: Boolean = false,
+    val hasLogFile: Boolean = false,
     val ffmpegAvailable: Boolean = false,
 )
 
@@ -46,6 +53,8 @@ class SettingsViewModel @Inject constructor(
     private val ffmpegExecutor: FfmpegProcessExecutor,
     private val gitHubUpdateClient: GitHubUpdateClient,
     private val networkGuard: NetworkGuard,
+    private val publisher: MediaStorePublisher,
+    private val workDirCleaner: WorkDirCleaner,
     private val logger: NexusLogger,
 ) : ViewModel() {
 
@@ -54,7 +63,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _actionStatus = MutableStateFlow(
         SettingsActionStatus(
-            recentLogs = logger.readRecentLines(),
+            recentLogs = emptyList(),
+            logsLoaded = false,
+            hasLogFile = logger.hasLogs(),
             ffmpegAvailable = ffmpegExecutor.isAvailable(),
         ),
     )
@@ -85,32 +96,29 @@ class SettingsViewModel @Inject constructor(
                 it.copy(
                     isBusy = false,
                     statusMessage = msg,
-                    recentLogs = logger.readRecentLines(),
+                    hasLogFile = logger.hasLogs(),
                 )
             }
         }
     }
 
-    fun checkAppUpdatePeriodically() {
+    fun checkAppUpdateOnLaunch() {
         viewModelScope.launch {
             val transport = networkGuard.currentTransport()
             val cfg = settingsRepository.settings.first()
             val blockedByNetwork = transport == NetworkTransport.OFFLINE ||
                 (cfg.wifiOnly && transport == NetworkTransport.CELLULAR)
-            val now = System.currentTimeMillis()
-            if (blockedByNetwork || !AppUpdatePolicy.shouldRunPeriodicCheck(cfg.lastAppUpdateCheckEpochMs, now)) {
-                return@launch
-            }
+            if (blockedByNetwork) return@launch
 
-            settingsRepository.recordAppUpdateCheck(now)
+            settingsRepository.recordAppUpdateCheck(System.currentTimeMillis())
             runCatching { gitHubUpdateClient.checkLatestUpdate() }
                 .onSuccess { update ->
-                    if (update != null && update.versionTag != cfg.dismissedUpdateVersionTag) {
+                    if (update != null) {
                         _actionStatus.update {
                             it.copy(
                                 availableUpdate = update,
-                                pendingUpdatePrompt = update,
-                                updateDialogError = null,
+                                showTopUpdateBanner = true,
+                                updateBannerError = null,
                             )
                         }
                     }
@@ -127,17 +135,15 @@ class SettingsViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            val now = System.currentTimeMillis()
-            settingsRepository.recordAppUpdateCheck(now)
+            settingsRepository.recordAppUpdateCheck(System.currentTimeMillis())
             runCatching { gitHubUpdateClient.checkLatestUpdate() }
                 .onSuccess { update ->
-                    if (update != null) {
-                        settingsRepository.setDismissedUpdateVersionTag("")
-                    }
                     _actionStatus.update {
                         it.copy(
                             isBusy = false,
                             availableUpdate = update,
+                            showTopUpdateBanner = update != null,
+                            updateBannerError = null,
                             statusMessage = if (update != null) {
                                 "Nova versão disponível (${update.channelLabel}): ${update.versionTag}"
                             } else {
@@ -153,23 +159,17 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun dismissUpdatePrompt() {
-        val dismissedTag = _actionStatus.value.pendingUpdatePrompt?.versionTag
-        _actionStatus.update { it.copy(pendingUpdatePrompt = null, updateDialogError = null) }
-        if (!dismissedTag.isNullOrBlank()) {
-            viewModelScope.launch {
-                settingsRepository.setDismissedUpdateVersionTag(dismissedTag)
-            }
-        }
+    fun dismissTopUpdateBanner() {
+        _actionStatus.update { it.copy(showTopUpdateBanner = false, updateBannerError = null) }
     }
 
     fun downloadAndPrepareUpdate() {
-        val update = _actionStatus.value.availableUpdate ?: _actionStatus.value.pendingUpdatePrompt ?: return
+        val update = _actionStatus.value.availableUpdate ?: return
         _actionStatus.update {
             it.copy(
                 isBusy = true,
                 updateDownloadProgress = 0f,
-                updateDialogError = null,
+                updateBannerError = null,
                 statusMessage = "Baixando ${update.apkFileName} e validando SHA-256...",
             )
         }
@@ -188,9 +188,9 @@ class SettingsViewModel @Inject constructor(
                 _actionStatus.update {
                     it.copy(
                         isBusy = false,
-                        pendingUpdatePrompt = null,
+                        showTopUpdateBanner = false,
                         updateDownloadProgress = null,
-                        updateDialogError = null,
+                        updateBannerError = null,
                         installIntent = intent,
                         statusMessage = "SHA-256 verificado! Pronto para instalar.",
                     )
@@ -201,7 +201,7 @@ class SettingsViewModel @Inject constructor(
                     it.copy(
                         isBusy = false,
                         updateDownloadProgress = null,
-                        updateDialogError = msg,
+                        updateBannerError = msg,
                         statusMessage = msg,
                     )
                 }
@@ -213,18 +213,63 @@ class SettingsViewModel @Inject constructor(
         _actionStatus.update { it.copy(installIntent = null) }
     }
 
-    fun refreshDiagnostics() {
+    fun refreshLogAvailability() {
         _actionStatus.update {
             it.copy(
-                recentLogs = logger.readRecentLines(),
+                hasLogFile = logger.hasLogs(),
                 ffmpegAvailable = ffmpegExecutor.isAvailable(),
             )
         }
     }
 
+    fun loadLogs() {
+        _actionStatus.update {
+            it.copy(
+                recentLogs = logger.readRecentLines(),
+                logsLoaded = true,
+                hasLogFile = logger.hasLogs(),
+                ffmpegAvailable = ffmpegExecutor.isAvailable(),
+            )
+        }
+    }
+
+    fun downloadLogsToDevice() {
+        _actionStatus.update { it.copy(isBusy = true, statusMessage = "Salvando arquivo de logs...") }
+        val tempJobId = "logs_${System.currentTimeMillis()}"
+        viewModelScope.launch {
+            val workDir = workDirCleaner.createJobWorkDir(tempJobId)
+            try {
+                val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                val baseName = "nexusfetch_logs_$stamp"
+                val snapshot = logger.copyLogSnapshotTo(File(workDir, "$baseName.log"))
+                    ?: throw NexusError.StorageError("Nenhum log registrado ainda.")
+                val published = publisher.publishLogFile(snapshot, baseName)
+                _actionStatus.update {
+                    it.copy(
+                        isBusy = false,
+                        hasLogFile = logger.hasLogs(),
+                        statusMessage = "Logs salvos em Download/NexusFetch/${published.fileName}",
+                    )
+                }
+            } catch (t: Throwable) {
+                val msg = (t as? NexusError)?.userMessage ?: (t.message ?: "Falha ao salvar logs.")
+                _actionStatus.update { it.copy(isBusy = false, statusMessage = msg) }
+            } finally {
+                workDirCleaner.deleteJobWorkDir(tempJobId)
+            }
+        }
+    }
+
     fun clearLogs() {
         logger.clearLogs()
-        _actionStatus.update { it.copy(recentLogs = emptyList(), statusMessage = "Logs locais limpos.") }
+        _actionStatus.update {
+            it.copy(
+                recentLogs = emptyList(),
+                logsLoaded = false,
+                hasLogFile = false,
+                statusMessage = "Logs locais limpos.",
+            )
+        }
     }
 
     fun getExportLogUri(): Uri? = logger.getExportUri()

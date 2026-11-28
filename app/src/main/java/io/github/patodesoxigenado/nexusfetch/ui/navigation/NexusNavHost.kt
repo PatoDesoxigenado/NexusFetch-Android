@@ -36,7 +36,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.patodesoxigenado.nexusfetch.service.JobOrchestrator
-import io.github.patodesoxigenado.nexusfetch.ui.components.AppUpdateDialog
+import io.github.patodesoxigenado.nexusfetch.ui.components.AppUpdateBanner
 import io.github.patodesoxigenado.nexusfetch.ui.components.JobProgressCard
 import io.github.patodesoxigenado.nexusfetch.ui.screens.compressor.CompressorScreen
 import io.github.patodesoxigenado.nexusfetch.ui.screens.compressor.CompressorViewModel
@@ -44,6 +44,7 @@ import io.github.patodesoxigenado.nexusfetch.ui.screens.converter.ConverterScree
 import io.github.patodesoxigenado.nexusfetch.ui.screens.converter.ConverterViewModel
 import io.github.patodesoxigenado.nexusfetch.ui.screens.downloader.DownloaderScreen
 import io.github.patodesoxigenado.nexusfetch.ui.screens.downloader.DownloaderViewModel
+import io.github.patodesoxigenado.nexusfetch.ui.screens.help.HelpScreen
 import io.github.patodesoxigenado.nexusfetch.ui.screens.history.HistoryScreen
 import io.github.patodesoxigenado.nexusfetch.ui.screens.history.HistoryViewModel
 import io.github.patodesoxigenado.nexusfetch.ui.screens.multi.MultiDownloadScreen
@@ -77,7 +78,7 @@ fun NexusNavHost(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        settingsVm.checkAppUpdatePeriodically()
+        settingsVm.checkAppUpdateOnLaunch()
     }
 
     LaunchedEffect(settingsStatus.installIntent) {
@@ -161,6 +162,20 @@ fun NexusNavHost(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
+            if (settingsStatus.showTopUpdateBanner) {
+                settingsStatus.availableUpdate?.let { update ->
+                    AppUpdateBanner(
+                        updateInfo = update,
+                        isDownloading = settingsStatus.isBusy,
+                        downloadProgress = settingsStatus.updateDownloadProgress,
+                        errorMessage = settingsStatus.updateBannerError,
+                        onDownloadAndInstall = settingsVm::downloadAndPrepareUpdate,
+                        onDismiss = settingsVm::dismissTopUpdateBanner,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                    )
+                }
+            }
+
             JobProgressCard(
                 state = activeJobState,
                 onCancel = jobOrchestrator::cancelActiveJob,
@@ -180,6 +195,7 @@ fun NexusNavHost(
                 composable(NexusDestination.CONVERTER.route) { ConverterScreen(converterVm) }
                 composable(NexusDestination.HISTORY.route) { HistoryScreen(historyVm) }
                 composable(NexusDestination.SETTINGS.route) { SettingsScreen(settingsVm) }
+                composable(NexusDestination.HELP.route) { HelpScreen() }
             }
         }
     }
@@ -209,16 +225,5 @@ fun NexusNavHost(
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
-    }
-
-    settingsStatus.pendingUpdatePrompt?.let { pendingUpdate ->
-        AppUpdateDialog(
-            updateInfo = pendingUpdate,
-            isDownloading = settingsStatus.isBusy,
-            downloadProgress = settingsStatus.updateDownloadProgress,
-            errorMessage = settingsStatus.updateDialogError,
-            onDownloadAndInstall = settingsVm::downloadAndPrepareUpdate,
-            onDismiss = settingsVm::dismissUpdatePrompt,
-        )
     }
 }

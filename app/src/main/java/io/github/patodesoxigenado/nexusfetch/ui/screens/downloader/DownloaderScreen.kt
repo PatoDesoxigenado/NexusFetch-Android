@@ -168,12 +168,12 @@ fun DownloaderScreen(
                     shape = RoundedCornerShape(14.dp),
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Suporte completo v1.4", style = MaterialTheme.typography.titleMedium)
+                        Text("Suporte Completo", style = MaterialTheme.typography.titleMedium)
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            "• YouTube: Vídeos até 4K 2160p, MP3 320 kbps, Thumbnails HD e Playlists.\n" +
+                            "• YouTube: Vídeos até 4K 2160p, MP3 320 kbps com capa automática, Thumbnails HD e Playlists.\n" +
                                 "• Instagram: Posts, Reels, Fotos originais e Carrosséis mistos.\n" +
-                                "• Twitter/X: Vídeos, GIFs animados (.gif) e Fotos ?name=orig.",
+                                "• Twitter/X: Vídeos, GIFs animados (.gif) e Fotos.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

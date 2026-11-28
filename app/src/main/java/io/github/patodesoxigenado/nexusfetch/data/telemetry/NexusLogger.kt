@@ -71,6 +71,17 @@ class NexusLogger @Inject constructor(
         durationMs: Long? = null,
     ) = write("ERROR", module, stage, message, jobId, encoder, durationMs, throwable)
 
+    fun hasLogs(): Boolean = synchronized(lock) {
+        primaryLogFile.exists() && primaryLogFile.length() > 0L
+    }
+
+    fun copyLogSnapshotTo(destFile: File): File? = synchronized(lock) {
+        if (!primaryLogFile.exists() || primaryLogFile.length() <= 0L) return null
+        destFile.parentFile?.mkdirs()
+        primaryLogFile.copyTo(destFile, overwrite = true)
+        destFile
+    }
+
     fun readRecentLines(maxLines: Int = 150): List<String> = synchronized(lock) {
         if (!primaryLogFile.exists()) return emptyList()
         runCatching {

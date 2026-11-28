@@ -74,6 +74,16 @@ class MediaStorePublisher @Inject constructor(
         )
     }
 
+    suspend fun publishLogFile(
+        sourceFile: File,
+        desiredBaseName: String,
+    ): PublishedMedia = publishFile(
+        sourceFile = sourceFile,
+        desiredBaseName = desiredBaseName,
+        module = JobModule.DOWNLOADER,
+        mediaType = MediaType.VIDEO,
+    )
+
     @RequiresApi(Build.VERSION_CODES.Q)
     private suspend fun publishScopedApi29Plus(
         sourceFile: File,
@@ -277,6 +287,8 @@ class MediaStorePublisher @Inject constructor(
             "webp" to "image/webp",
             "jpg" to "image/jpeg",
             "jpeg" to "image/jpeg",
+            "log" to "text/plain",
+            "txt" to "text/plain",
         )
     }
 }

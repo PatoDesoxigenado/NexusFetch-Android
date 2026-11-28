@@ -1,32 +1,32 @@
 {
-  "versionCode": 2,
-  "versionName": "1.0.1",
-  "updatedAt": "2026-11-25T18:54:59.578323400Z",
-  "releaseNotes": "NexusFetch v1.0.1: Downloads YouTube (4K/MP3), Instagram (Posts, Reels e Carrosséis) e Twitter/X; Share Sheet rápido, Multi-Download em fila, Compressor Discord/WhatsApp, Conversor em lote e Recorte Rápido.",
+  "versionCode": 3,
+  "versionName": "1.1.0",
+  "updatedAt": "2026-11-28T18:10:07.639475100Z",
+  "releaseNotes": "NexusFetch v1.1.0: Capa de álbum 1:1 automática nos MP3 do YouTube/YT Music, banner automático de atualização no topo, tela de Ajuda e download/carregamento de logs sob demanda.",
   "release": {
       "fileName": "NexusFetch.apk",
       "path": "apk/NexusFetch.apk",
-      "sha256": "991f455a143e228926b24ef9b884d27ebc6b9341af56f2c1884c79d47f346976",
-      "sizeBytes": 57010661,
-      "versionCode": 2,
-      "versionName": "1.0.1"
+      "sha256": "4f64dfaac6bdee6d41631e479ba83bdc51d237d03c8f652bb1bbcadf01a5b59e",
+      "sizeBytes": 57020073,
+      "versionCode": 3,
+      "versionName": "1.1.0"
     },
   "debug": {
     "arm64-v8a": {
       "fileName": "NexusFetch_arm64-v8a-debug.apk",
       "path": "apk/debug/NexusFetch_arm64-v8a-debug.apk",
-      "sha256": "12ab184e8850e25c170c490484b50cc2b6ba3345e915d9d33d88c6a126db14af",
-      "sizeBytes": 77498251,
-      "versionCode": 2,
-      "versionName": "1.0.1-debug"
+      "sha256": "ba9f1896c8482c6db08a27f8220983eaf40fbd830e3be3739a92a4f1d7600eb0",
+      "sizeBytes": 77528591,
+      "versionCode": 3,
+      "versionName": "1.1.0-debug"
     },
     "armeabi-v7a": {
       "fileName": "NexusFetch_armeabi-v7a-debug.apk",
       "path": "apk/debug/NexusFetch_armeabi-v7a-debug.apk",
-      "sha256": "030b786032c95db42a78c707cbde1742ac092430d086ab90981ad2491cfc030d",
-      "sizeBytes": 70826395,
-      "versionCode": 2,
-      "versionName": "1.0.1-debug"
+      "sha256": "909e99d584b6db2e7e6d9aa7a1a567b069706fbd483341a8917fdfc1d454f7a6",
+      "sizeBytes": 70856731,
+      "versionCode": 3,
+      "versionName": "1.1.0-debug"
     }
   }
 }

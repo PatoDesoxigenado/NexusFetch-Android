@@ -3,7 +3,7 @@
 > **Baixe vídeos (até 4K), áudios (MP3 320 kbps), fotos HD e carrosséis do YouTube, Instagram e Twitter/X — tudo 100% local, sem anúncios e sem rastreadores.**  
 > **Comprima, converta e recorte mídias direto no celular com aceleração por hardware (Media3) e FFmpeg nativo.**
 
-[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.0.1-E50914.svg)](https://github.com/PatoDesoxigenado/NexusFetch-Android/blob/main/apk/version.json)
+[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.1.0-E50914.svg)](https://github.com/PatoDesoxigenado/NexusFetch-Android/blob/main/apk/version.json)
 [![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
 [![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026--35)-3DDC84.svg)](https://developer.android.com/)
 [![Kotlin](https://img.shields.io/badge/Kotlin-Compose%20Material%203-7F52FF.svg)](https://kotlinlang.org/)
@@ -34,9 +34,9 @@
 ### ✨ Principais Funcionalidades
 
 - **⬇️ Downloader Universal (YouTube, Instagram e Twitter/X):**
-  - **YouTube:** Vídeos de 360p até **4K (2160p)**, extração de áudio **MP3 320 kbps**, thumbnails HD e **Playlists** com seleção individual.
+  - **YouTube:** Vídeos de 360p até **4K (2160p)**, extração de áudio **MP3 320 kbps** com **capa quadrada 1:1 automática** nas tags ID3v2.3 (YouTube & YouTube Music), thumbnails HD e **Playlists** com seleção individual.
   - **Instagram:** Posts públicos, **Reels/Vídeos**, **Fotos originais sem recorte** e **Carrosséis seletivos** (incluindo carrosséis mistos com fotos + vídeos).
-  - **Twitter / X:** Vídeos direto em MP4, **GIFs animados** (`.gif`), carrosséis e fotos na resolução original (`?name=orig`).
+  - **Twitter / X:** Vídeos direto em MP4, **GIFs animados** (`.gif`), carrosséis e fotos em alta resolução.
 - **⚡ Compartilhar Direto (Share Sheet / Ação Rápida):**
   - Ao tocar em *Compartilhar* no YouTube, Instagram ou X e escolher **NexusFetch**, um painel rápido analisa o link em cerca de ~1–2 segundos e permite baixar Vídeo, Foto HD, Carrossel, MP3 ou enviar direto ao Recorte sem sair do app atual.
   - Também aceita compartilhamento de vídeos e áudios locais direto da Galeria para o **Compressor**, **Conversor** ou **Recorte**.
@@ -48,9 +48,9 @@
   - **Áudio:** Extração e conversão para **MP3 320 kbps**, WAV, FLAC, M4A, OGG e OPUS.
 - **✂️ Recorte Rápido (Trim / Clip):**
   - Recorte trechos exatos de vídeos remotos do YouTube (até 4K) **sem baixar o vídeo inteiro** (`--download-sections`) ou recorte vídeos/áudios locais sem perda de qualidade.
-- **📋 Multi-Download, Histórico & Controle de Dados:**
+- **📋 Multi-Download, Histórico, Ajuda & Controle de Dados:**
   - Fila persistente em banco local (**Room SQLite**) para analisar e baixar múltiplos links em sequência.
-  - Aba de **Histórico** integrada à Galeria/Downloads do Android (`MediaStore`) e proteção para **Modo Apenas Wi-Fi** ou aviso antes de consumir 4G/5G.
+  - Aba **Histórico** integrada à Galeria/Downloads do Android (`MediaStore`), tela **Ajuda** em **Mais Ferramentas**, proteção **Modo Apenas Wi-Fi** e carregamento/download de logs sob demanda em **Ajustes**.
 
 ---
 
@@ -60,7 +60,7 @@
 - **Privacidade por Concepção (Zero Rastreamento / LGPD):** Não exige login nem envia URLs ou dados pessoais para servidores terceiros; logs locais sanitizam tokens e caminhos privados automaticamente.
 - **Processamento 100% Local no Aparelho:** Downloads, compressões, recortes e conversões rodam diretamente no seu smartphone via Media3 e FFmpeg.
 - **Motor `yt-dlp` Auto-Atualizável:** Atualiza o extrator automaticamente em segundo plano ou sob demanda em **Mais → Configurações**, mantendo compatibilidade contínua mesmo quando as plataformas mudam.
-- **Atualização Automática Verificada (`apk/`):** Periodicamente o app consulta [apk/version.json](apk/version.json) (tanto no canal **Release** quanto nas builds **Debug** por arquitetura) e só libera a instalação após validar o checksum **SHA-256**.
+- **Atualização Automática Verificada (`apk/`):** Sempre que o app é aberto (respeitando offline/Modo Apenas Wi-Fi), ele consulta [apk/version.json](apk/version.json) (tanto no canal **Release** quanto nas builds **Debug** por arquitetura), exibe um aviso discreto no topo da tela quando há nova versão e só libera a instalação após validar o checksum **SHA-256**.
 
 ---
 
@@ -156,7 +156,7 @@ Para gerar uma nova versão pronta na pasta raiz `apk/` (já atualizando `apk/Ne
 
 #### Como funciona o Auto-Updater via `apk/version.json`
 - A task Gradle `stageDistributionApks` calcula o SHA-256 de `apk/NexusFetch.apk` e de cada APK em `apk/debug/`, gravando tudo em `apk/version.json`.
-- A cada **6 horas** (respeitando rede Wi-Fi / Modo Apenas Wi-Fi) ou manualmente em **Mais → Configurações → Checar App**, o `GitHubUpdateClient` + `AppUpdatePolicy` lê `apk/version.json` no branch `main`:
+- A cada abertura do app (respeitando rede Wi-Fi / Modo Apenas Wi-Fi) ou manualmente em **Mais → Ajustes → Checar App**, o `GitHubUpdateClient` + `AppUpdatePolicy` lê `apk/version.json` no branch `main`:
   - Em builds **Release**, compara com `release` (`apk/NexusFetch.apk`).
   - Em builds **Debug**, seleciona automaticamente a ABI compatível em `debug` (`arm64-v8a` ou `armeabi-v7a`).
-- Havendo `versionCode` ou versão semântica maior que a instalada, o usuário recebe o alerta `AppUpdateDialog` e o download só abre o instalador do Android após confirmação rigorosa do hash **SHA-256**.
+- Havendo `versionCode` ou versão semântica maior que a instalada, um banner discreto (`AppUpdateBanner`) aparece no topo da tela e o download só abre o instalador do Android após confirmação rigorosa do hash **SHA-256**.

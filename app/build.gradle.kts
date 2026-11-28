@@ -32,8 +32,8 @@ android {
         applicationId = "io.github.patodesoxigenado.nexusfetch"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -245,8 +245,8 @@ tasks.register("stageDistributionApks") {
             }
         }
 
-        val notes = "NexusFetch v$verName: Downloads YouTube (4K/MP3), Instagram (Posts, Reels e Carrosséis) e Twitter/X; " +
-            "Share Sheet rápido, Multi-Download em fila, Compressor Discord/WhatsApp, Conversor em lote e Recorte Rápido."
+        val notes = "NexusFetch v$verName: Capa de álbum 1:1 automática nos MP3 do YouTube/YT Music, " +
+            "banner automático de atualização no topo, tela de Ajuda e download/carregamento de logs sob demanda."
 
         fun artifactJson(fileName: String, relPath: String, file: java.io.File, aCode: Int, aName: String): String =
             """

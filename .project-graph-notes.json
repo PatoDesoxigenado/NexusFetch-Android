@@ -96,22 +96,40 @@
         "Controla cooldown periódico (6h), bloqueia path traversal fora de apk/ e valida SHA-256; consumida por [[GitHubUpdateClient.kt]] e [[SettingsViewModel.kt]]."
       ]
     },
-    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/components/AppUpdateDialog.kt": {
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/domain/policy/AudioCoverPolicy.kt": {
       "summary": [
-        "Diálogo Material 3 exibido pelo [[NexusNavHost.kt]] quando há atualização mais recente na pasta apk/ (Release ou Debug).",
-        "Exibe canal, tamanho formatado, notas, progresso de download em tempo real e dispara instalação verificada por SHA-256."
+        "Política Kotlin pura para seleção de thumbnails do YouTube/YT Music, recorte 1:1 central (com remoção de letterbox 4:3) e args FFmpeg ID3v2.3.",
+        "Espelha a versão Desktop v1.45 e é consumida por [[AudioCoverEmbedder.kt]] com cobertura em [[AudioCoverPolicyTest.kt]]."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/data/engine/AudioCoverEmbedder.kt": {
+      "summary": [
+        "Baixa thumbnail de maior resolução via [[DirectMediaDownloader.kt]], recorta 1:1 via Bitmap e embute capa APIC ID3v2.3 no MP3 via [[FfmpegProcessExecutor.kt]].",
+        "Acionado automaticamente pelo [[JobOrchestrator.kt]] em MP3s avulsos, playlists e Multi-Download do YouTube."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/components/AppUpdateBanner.kt": {
+      "summary": [
+        "Banner Material 3 exibido no topo do [[NexusNavHost.kt]] sempre que há versão mais nova na pasta apk/ (Release ou Debug).",
+        "Mostra canal, arquivo, progresso SHA-256 e botão Atualizar sem bloquear a tela."
+      ]
+    },
+    "app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/screens/help/HelpScreen.kt": {
+      "summary": [
+        "Tela Ajuda exibida logo abaixo de Ajustes no menu Mais Ferramentas do [[NexusNavHost.kt]].",
+        "Resume o uso de Downloader, Share Sheet, Fila, Compressor, Recorte, Conversor, Pastas e Logs."
       ]
     },
     "app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/navigation/NexusNavHost.kt": {
       "summary": [
-        "Host Compose de navegação principal com barra inferior fixa, bottom sheet 'Mais Ferramentas' e card global [[JobProgressCard.kt]].",
-        "Dispara checagem periódica de atualização do [[SettingsViewModel.kt]] e apresenta [[AppUpdateDialog.kt]] globalmente."
+        "Host Compose de navegação principal com barra inferior fixa, bottom sheet 'Mais Ferramentas' e rota [[HelpScreen.kt]].",
+        "Dispara checagem automática de atualização ao abrir via [[SettingsViewModel.kt]] e exibe [[AppUpdateBanner.kt]] no topo."
       ]
     },
     "app/src/main/java/io/github/patodesoxigenado/nexusfetch/ui/screens/settings/SettingsViewModel.kt": {
       "summary": [
-        "Gerencia preferências persistentes ([[SettingsRepository.kt]]), atualização manual/automática do yt-dlp e logs diagnósticos.",
-        "Orquestra checagem periódica ([[AppUpdatePolicy.kt]]) e manual na pasta apk/ via [[GitHubUpdateClient.kt]] respeitando [[NetworkGuard.kt]]."
+        "Gerencia preferências persistentes ([[SettingsRepository.kt]]), carregamento sob demanda e salvamento de logs em Downloads via [[MediaStorePublisher.kt]].",
+        "Orquestra checagem automática de atualização na abertura e manual na pasta apk/ via [[GitHubUpdateClient.kt]] respeitando [[NetworkGuard.kt]]."
       ]
     },
     "app/src/main/java/io/github/patodesoxigenado/nexusfetch/domain/policy/UrlValidator.kt": {

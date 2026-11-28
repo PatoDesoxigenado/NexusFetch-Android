@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -33,6 +34,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +57,10 @@ fun SettingsScreen(
     val status by viewModel.actionStatus.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val extra = LocalNexusColors.current
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshLogAvailability()
+    }
 
     Column(
         modifier = modifier
@@ -236,17 +242,20 @@ fun SettingsScreen(
             }
         }
 
-        // Diagnostics & Sanitized Logs
+        // Diagnostics & Local Logs
         Card(
             shape = RoundedCornerShape(14.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             border = BorderStroke(1.dp, extra.border),
         ) {
             Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Logs Locais (Sanitizados)", style = MaterialTheme.typography.titleMedium)
+                Text("Logs Locais", style = MaterialTheme.typography.titleMedium)
 
                 Text(
-                    "Zero telemetria externa. Tokens e caminhos privados são ocultados automaticamente.",
+                    "Os logs ficam guardados apenas localmente no aparelho. Caso encontre algum bug ou problema, " +
+                        "baixe ou exporte os logs e envie em uma issue no repositório do GitHub descrevendo o que " +
+                        "aconteceu — se possível informando o modelo do telefone para avaliarmos compatibilidade " +
+                        "com o Android.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -256,12 +265,12 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     OutlinedButton(
-                        onClick = viewModel::refreshDiagnostics,
+                        onClick = viewModel::loadLogs,
                         modifier = Modifier.weight(1f),
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                     ) {
                         Text(
-                            text = "Atualizar",
+                            text = if (status.logsLoaded) "Atualizar logs" else "Carregar logs",
                             maxLines = 1,
                             softWrap = false,
                             overflow = TextOverflow.Ellipsis,
@@ -270,6 +279,7 @@ fun SettingsScreen(
                     }
                     OutlinedButton(
                         onClick = viewModel::clearLogs,
+                        enabled = status.hasLogFile || status.logsLoaded,
                         modifier = Modifier.weight(1f),
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                     ) {
@@ -283,44 +293,72 @@ fun SettingsScreen(
                     }
                 }
 
-                val logPreview = if (status.recentLogs.isEmpty()) {
-                    "Nenhum evento registrado ainda."
-                } else {
-                    status.recentLogs.takeLast(12).joinToString("\n")
+                if (status.logsLoaded) {
+                    val logPreview = if (status.recentLogs.isEmpty()) {
+                        "Nenhum evento registrado ainda."
+                    } else {
+                        status.recentLogs.takeLast(12).joinToString("\n")
+                    }
+                    Text(
+                        text = logPreview,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
-                Text(
-                    text = logPreview,
-                    style = MaterialTheme.typography.bodySmall,
-                )
 
                 Spacer(modifier = Modifier.height(2.dp))
-                OutlinedButton(
-                    onClick = {
-                        viewModel.getExportLogUri()?.let { uri ->
-                            val share = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_STREAM, uri)
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            }
-                            runCatching { context.startActivity(Intent.createChooser(share, "Exportar logs")) }
-                        }
-                    },
-                    enabled = status.recentLogs.isNotEmpty(),
+                Row(
                     modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Icon(
-                        Icons.Rounded.Share,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Exportar Arquivo de Log",
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center,
-                    )
+                    OutlinedButton(
+                        onClick = viewModel::downloadLogsToDevice,
+                        enabled = status.hasLogFile && !status.isBusy,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp),
+                    ) {
+                        Icon(
+                            Icons.Rounded.Download,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Baixar Logs",
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            viewModel.getExportLogUri()?.let { uri ->
+                                val share = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                runCatching { context.startActivity(Intent.createChooser(share, "Exportar logs")) }
+                            }
+                        },
+                        enabled = status.hasLogFile && !status.isBusy,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp),
+                    ) {
+                        Icon(
+                            Icons.Rounded.Share,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Exportar",
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
             }
         }
