@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > Mapa estrutural e semântico para Obsidian e Otimização de Tokens do Antigravity.
-> **Atualizado em**: 2026-11-28 15:21:23 | **Stack**: Generic | **Arquivos Indexados**: 146
+> **Atualizado em**: 2026-11-28 15:42:59 | **Stack**: Generic | **Arquivos Indexados**: 146
 > **Legenda de Certeza**: `-->` Confirmada | `-.->` Inferida | `⚠️` Dependência Dinâmica/Desconhecida (exige validação no código).
 
 ## 1. Índice Estrutural (Visão Rápida)
